@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Events</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+        #events-list {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upcoming Events</h1>
+    <div id="events-list">
+        <input type="text" id="search-input" placeholder="Search events...">
+        <button onclick="searchEvents()">Search</button>
+        <div id="events"></div>
+    </div>
+
+    <script>
+        const token = '2G7LOMZ237U5BJP5WNZR'; // Replace with your actual Eventbrite OAuth token
+
+        async function fetchEvents(query) {
+            try {
+                const response = await fetch(`https://www.eventbrite.com/platform/api/v3/events/search/?q=${query}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayEvents(data.events);
+                } else {
+                    console.error('Error fetching events:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
+            }
+        }
+
+        function displayEvents(events) {
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.innerHTML = '';
+
+            if (events.length === 0) {
+                eventsDiv.innerHTML = '<p>No events found.</p>';
+                return;
+            }
+
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.innerHTML = `
+                    <h3>${event.name.text}</h3>
+                    <p>Date: ${event.start.local}</p>
+                    <p>Location: ${event.venue.address.city}, ${event.venue.address.country}</p>
+                    <hr>
+                `;
+                eventsDiv.appendChild(eventDiv);
+            });
+        }
+
+        function searchEvents() {
+            const query = document.getElementById('search-input').value;
+            fetchEvents(query);
+        }
+
+        window.addEventListener('load', () => {
+            // Fetch some initial events when the page loads
+            fetchEvents('music'); // You can change the initial search query here
+        });
+    </script>
+</body>
+</html>
